@@ -1,0 +1,12 @@
+[package]
+name = "dubsearch"
+version = "0.1.0"
+authors = [ "M@ Dunlap <mattdunlap@gmail.com>" ]
+description = "A simple A* based Dubins path search."
+edition = "2018"
+license = "MIT"
+repository = "https://github.com/dunmatt/dubsearch"
+
+[dependencies]
+euclid = "^0"
+pathfinding = "2"
