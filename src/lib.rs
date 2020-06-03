@@ -1,18 +1,59 @@
 //! This is a throw away library for doing path planning on a 2D plane with circular obstacles.
 //!
-//! TODO: document me more and add examples
+//! The core intuition of this library is in the way that it massages the problem into a
+//! graph search.  Rather than creating an explicit occupancy grid and rendering the obstacles
+//! to it, we instead consider obstacles to be landmarks and search for sequences of landmarks
+//! that collectively form a path.
 //!
+//! Optimality proofs that such a path has the minimum possible length can be found in the
+//! references at https://en.wikipedia.org/wiki/Dubins_path
 //!
+//! # Example:
+//! ```
+//! use dubsearch;
 //!
+//! let origin = dubsearch::Point::new(-100, 0);
+//! let destination = dubsearch::Point::new(100, 1);  // 1 here to ensure we always go left
+//! let elephant = dubsearch::Circle {
+//!     center: dubsearch::Point::origin(),
+//!     radius: 50,
+//! };
+//! let radius = 5;
 //!
+//! let path = dubsearch::shortest_path_for_circle(origin, destination, &vec![elephant], radius);
 //!
-//!
-//!
-//!
-//!
+//! println!("{:?}", path);
+//! assert_eq!(path.expect("No path found!").len(), 3);
+//! ```
 //!
 
-#![deny(missing_docs)]
+#![deny(
+    // dead_code,  // TODO: uncomment me
+    deprecated,
+    improper_ctypes,
+    missing_debug_implementations,
+    missing_docs,
+    path_statements,
+    renamed_and_removed_lints,
+    stable_features,
+    trivial_casts,
+    trivial_numeric_casts,
+    unknown_lints,
+    unreachable_code,
+    unreachable_patterns,
+    unused_allocation,
+    unused_assignments,
+    unused_attributes,
+    unused_comparisons,
+    unused_features,
+    unused_import_braces,
+    unused_macros,
+    unused_must_use,
+    unused_parens,
+    unused_qualifications,
+    // unused_variables,  // TODO: uncomment me
+    while_true
+)]
 #![forbid(unsafe_code)]
 
 use pathfinding::directed::astar::astar;
@@ -71,7 +112,7 @@ pub fn shortest_path_for_point(
 ) -> Option<Vec<DubinsPathSegment>> {
     astar(
         &Landmark::Origin(origin),
-        |node| node.enumerate_successors(&destination, obstacles),
+        |node| utils::SuccessorIter::new(*node, destination, obstacles),
         |node| node.distance_to(&destination),
         |node| node.is_at(&destination),
     )
@@ -107,13 +148,5 @@ impl Landmark {
             Landmark::LeftOf(o) => &o.center,
             Landmark::RightOf(o) => &o.center,
         }
-    }
-
-    fn enumerate_successors<'a>(
-        &self,
-        target: &Point,
-        nodes: &'a Vec<Circle>,
-    ) -> utils::SuccessorIter<'a> {
-        utils::SuccessorIter { parent: *self, target: *target, all_nodes: nodes }
     }
 }

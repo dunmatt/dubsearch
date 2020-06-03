@@ -5,9 +5,15 @@ pub fn convert_landmarks_to_dubins_path(landmarks: Vec<Landmark>) -> Vec<DubinsP
 }
 
 pub struct SuccessorIter<'a> {
-    pub parent: Landmark,
-    pub target: Point,
-    pub all_nodes: &'a Vec<Circle>,
+    parent: Landmark,
+    target: Point,
+    all_nodes: &'a Vec<Circle>,
+}
+
+impl<'a> SuccessorIter<'a> {
+    pub fn new(parent: Landmark, target: Point, all_nodes: &Vec<Circle>) -> SuccessorIter {
+        SuccessorIter { parent, target, all_nodes }
+    }
 }
 
 impl<'a> Iterator for SuccessorIter<'a> {
